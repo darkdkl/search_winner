@@ -1,4 +1,7 @@
 *.vscode
 *.env
 __pycache__
-
+*.txt
+!requirements.txt
+*.checkpoint
+*.log
