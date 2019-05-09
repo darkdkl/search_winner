@@ -40,8 +40,8 @@ if __name__ == "__main__":
 
     list_users = []
 # для теста get_media_comments заменить на enumerate(bot.get_media_comments_all(media_id)) "https://www.instagram.com/p/BtON034lPhu/" 'beautybar.rus'
-
-    for number, post in enumerate(bot.get_media_comments_all(media_id)):
+    
+    for number, post in enumerate(bot.get_media_comments(media_id)):
         found_user = get_users(post['text'])
         existing_user = is_user_exist(''.join(get_users(post['text'])))
         username = bot.get_media_comments(media_id)[number]['user']['username']
@@ -51,6 +51,8 @@ if __name__ == "__main__":
 
             user = str(id_user), username
             list_users.append(user)
+        print('Поиск победителей','.'*number,end='\r') 
+        
         time.sleep(3)
-
+    print()
     pprint(set(list_users))
