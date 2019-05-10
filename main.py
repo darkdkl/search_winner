@@ -1,10 +1,8 @@
 import requests
 import os
 from instabot import Bot
-from dotenv import load_dotenv
 import re
 import time
-from pprint import pprint
 import argparse
 
 
@@ -34,25 +32,30 @@ if __name__ == "__main__":
     bot = Bot()
     bot.login(username=args.login, password=args.password)
     media_id = bot.get_media_id_from_link(args.url_adress)
-    liker_list = bot.get_media_likers(media_id)
+    list_likers = bot.get_media_likers(media_id)
 
-    followers_list = bot.get_user_followers(args.author)
+    list_followers = bot.get_user_followers(args.author)
 
-    list_users = []
-# для теста get_media_comments заменить на enumerate(bot.get_media_comments_all(media_id)) "https://www.instagram.com/p/BtON034lPhu/" 'beautybar.rus'
-    
-    for number, post in enumerate(bot.get_media_comments(media_id)):
-        found_user = get_users(post['text'])
-        existing_user = is_user_exist(''.join(get_users(post['text'])))
-        username = bot.get_media_comments(media_id)[number]['user']['username']
-        id_user = bot.get_user_id_from_username(username)
+    list_winners = []
 
-        if found_user and existing_user and (str(id_user) in liker_list) and (str(id_user) in followers_list):
+    for post in bot.get_media_comments_all(media_id):
+        candidate = post['user']['username']
+        id_candidate = bot.get_user_id_from_username(candidate)
 
-            user = str(id_user), username
-            list_users.append(user)
-        print('Поиск победителей','.'*number,end='\r') 
-        
-        time.sleep(3)
+        print('Проверяем пользователя :', candidate,
+              '                         ', end='\r')
+
+        existing_user = []
+
+        for user in set(get_users(post['text'])):
+            existing_user.append(is_user_exist(user))
+
+        if True in existing_user and (str(id_candidate) in list_followers) and (str(id_candidate) in list_likers):
+            winner = str(id_candidate), candidate
+
+            list_winners.append(winner)
+
+        time.sleep(2)
+
     print()
-    pprint(set(list_users))
+    print('Список победителей :', set(list_winners))
