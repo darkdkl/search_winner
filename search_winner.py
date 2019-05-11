@@ -7,6 +7,7 @@ import argparse
 
 
 def get_users(text):
+    # Regex for Instagram,original: "https://blog.jstassen.com/2016/03/code-regex-for-instagram-username-and-hashtags"
     return re.findall('(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)', text)
 
 
@@ -32,30 +33,27 @@ if __name__ == "__main__":
     bot = Bot()
     bot.login(username=args.login, password=args.password)
     media_id = bot.get_media_id_from_link(args.url_adress)
-    list_likers = bot.get_media_likers(media_id)
+    likers_list = bot.get_media_likers(media_id)
 
-    list_followers = bot.get_user_followers(args.author)
+    followers_list = bot.get_user_followers(args.author)
 
-    list_winners = []
+    candidates_list = []
 
     for post in bot.get_media_comments_all(media_id):
         candidate = post['user']['username']
-        id_candidate = bot.get_user_id_from_username(candidate)
+        candidate_id = bot.get_user_id_from_username(candidate)
 
         print('Проверяем пользователя :', candidate,
               '                         ', end='\r')
 
-        existing_user = []
+        validation_list = [is_user_exist(user) for user in set(get_users(post['text']))]
 
-        for user in set(get_users(post['text'])):
-            existing_user.append(is_user_exist(user))
+        if True in validation_list and (str(candidate_id) in followers_list) and (str(candidate_id) in likers_list):
+            winner = str(candidate_id), candidate
 
-        if True in existing_user and (str(id_candidate) in list_followers) and (str(id_candidate) in list_likers):
-            winner = str(id_candidate), candidate
-
-            list_winners.append(winner)
+            candidates_list.append(winner)
 
         time.sleep(2)
 
     print()
-    print('Список победителей :', set(list_winners))
+    print('Список победителей :', set(candidates_list))
